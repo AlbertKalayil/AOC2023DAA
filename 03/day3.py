@@ -1,6 +1,7 @@
 import easygui
 import time
 
+
 AOCDAY = "03"
 
 def readFile(fileName):
@@ -12,6 +13,9 @@ def readFile(fileName):
     return lines
 
 def part1(lines):
+
+    dirs = ((-1,-1), (-1,0), (-1,1), (0,-1), (0,1), (1,0), (1,-1),(1,1))
+
     result = 0
     for ycoord, line in enumerate(lines):
         number = ''
@@ -20,23 +24,76 @@ def part1(lines):
             if c.isnumeric():
                 number += c
                 #check for symbol
-                part = True
+                for dir in dirs:
+                    xtarget = xcoord + dir[0]
+                    ytarget = ycoord + dir[1]
+                    if xtarget >= 0 and xtarget < len(line) and \
+                        ytarget >= 0 and ytarget < len(lines):
+                        target = lines[ytarget][xtarget]
+                        if not target.isnumeric() and target != ".":
+                            part=True
+
             else:
                 if part:
                     result += int(number)
-                    print(number)
                 number = ''
                 part = False
-
+        if part:
+            result += int(number)
+        number = ''
+        part = False
 
     # Code the solution to part 1 here, returning the answer as a string
 
-    return(f"Result of Part 1.")
+    return(f"Total of part numbers is {result}")
 
 def part2(lines):
-    # Code the solution to part 2 here, returning the answer as a string
 
-    return(f"Result of Part 2.")
+    dirs = ((-1,-1), (-1,0), (-1,1), (0,-1), (0,1), (1,0), (1,-1),(1,1))
+    gearcoords = {}
+    result = 0
+    for ycoord, line in enumerate(lines):
+        number = ''
+        gears= []
+        for xcoord, c in enumerate(line):
+            if c.isnumeric():
+                number += c
+                #check for symbol
+                for dir in dirs:
+                    xtarget = xcoord + dir[0]
+                    ytarget = ycoord + dir[1]
+                    if xtarget >= 0 and xtarget < len(line) and \
+                        ytarget >= 0 and ytarget < len(lines):
+                        target = lines[ytarget][xtarget]
+                        if target == '*' :
+                            gearcoord = f"{xtarget},{ytarget}"
+                            if not gearcoord in gears:
+                                gears.append(gearcoord)
+
+            else:
+                if len(gears) > 0:
+                    for gear in gears:
+                        if gear not in gearcoords.keys():
+                            gearcoords[gear]=[int(number)]
+                        else:
+                            gearcoords[gear].append(int(number))
+                number = ''
+                gears = []
+        if len(gears) > 0:
+            for gear in gears:
+                if gear not in gearcoords.keys():
+                    gearcoords[gear]=[int(number)]
+                else:
+                    gearcoords[gear].append(int(number))
+        number = ''
+        gears = []
+        
+    for gearcoord in gearcoords.values():
+        if len(gearcoord) == 2:
+           result += gearcoord[0]*gearcoord[1]
+
+
+    return(f"Total of part numbers is {result}")
 
 def main ():
     # Opens a dialog to select the input file
