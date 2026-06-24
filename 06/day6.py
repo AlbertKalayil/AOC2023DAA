@@ -22,7 +22,6 @@ def part1(lines):
     num_races_won = []
     for index, time in enumerate(times_updated):
         count = 0
-        print("This is column ", index)
         for i in range(time):
             travelled = i * (time - i)
             if travelled > distances_updated[index]:
@@ -33,19 +32,28 @@ def part1(lines):
     for races_won in num_races_won:
         result *= races_won
 
-    print(result)
-        
-
-            
-
-        
-
-    return(f"Result of Part 1.")
+    return(f"The total number of ways we can win part 1 is {result}")
 
 def part2(lines):
     # Code the solution to part 2 here, returning the answer as a string
+    times = int(lines[0].split(': ')[1].strip().replace(' ', ''))
+    
 
-    return(f"Result of Part 2.")
+    distances = int(lines[1].split(': ')[1].strip().replace(' ', ''))
+    
+    num_races_won = []
+    count = 0
+    for i in range(times):
+        travelled = i * (times - i)
+        if travelled > distances:
+            count += 1
+    num_races_won.append(count)
+    
+    result = 1
+    for races_won in num_races_won:
+        result *= races_won
+
+    return(f"The total number of ways to win part 2 is {result}")
 
 def main ():
     # Opens a dialog to select the input file
