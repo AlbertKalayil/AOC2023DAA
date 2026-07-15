@@ -22,27 +22,31 @@ def mapping(value, map):
 def map_pairs(pairs, map):
     result = []
     while len(pairs) != 0:
+      
         a, b = pairs.pop(0)
-        
+        hit=False
         for c,d, diff in map:
             if a >= c and a <= d:
-                result.append((a+diff, d+diff))
+                hit=True
+                result.append((a+diff,min(b+diff, d+diff)))
                 if b > d:
                     pairs.append((d+1, b))
                 break
             if b >= c and b <= d:
+                hit=True
                 result.append((c+diff, b+diff))
                 if c > a:
                     pairs.append((a, c-1))
                 break
             if a < c and b > d:
+                hit=True
                 result.append((c+diff, d+diff))
-                if b > d:
-                    pairs.append((d+1, b))
+                pairs.append((d+1, b))
             
-                if c > a:
-                    pairs.append((a, c-1))
+                pairs.append((a, c-1))
                 break
+        if not hit:
+            result.append((a,b))
     return result
 
 def part1(lines):
@@ -83,15 +87,11 @@ def part2(lines):
             maps[-1].append((b,b+c-1,a-b))
     for map in maps:
         seeds = map_pairs(seeds, map)
-        print(seeds)
-    # result = float('inf')
-    # for seed in seeds:
-    #     value = seed  
-    #     for map in maps:
-    #         value = mapping(value, map)
-        
-    #     result = min(result, value)
-    # return(f"The smallest seed number was {result}.")
+    # seeds = map_pairs(seeds,maps[0])
+    for seed in seeds:
+        print(seed)
+    lowest_seed = min([x for x,y in seeds]) 
+    return f'The lowest number is {lowest_seed}'
 
 def main ():
     # Opens a dialog to select the input file
