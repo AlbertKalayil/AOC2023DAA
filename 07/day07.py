@@ -65,21 +65,16 @@ class Hand_Part2:
         
         val2 = values[1]
 
-        score = val1 * 2 + (1 if val2 == 2 else 0)
-
         if jacks == 0:
             return val1 * 2 + (1 if val2 == 2 else 0)
 
-        if val1 != 5 and values[1] == 2:
-            val2 = 1
+        if val1 ==2 and val2 == 2 and jacks == 1:
+            return 7
         
-        else:
-            val2 = 0
-        
-        return val1 * 2 + val2
+        return (val1 + val2) * 2
     
     def cardvalue(self):
-        val_dict = {'J':0, '2':1, '3':2, '4':3, '5':4, '6':5, '7':6, '8':7, '9':8, 'T':9, 'Q':11, 'K':12, 'A':13}
+        val_dict = {'J':0, '2':1, '3':2, '4':3, '5':4, '6':5, '7':6, '8':7, '9':8, 'T':9, 'Q':10, 'K':11, 'A':12}
         result = 0
 
         for i in range(5):
@@ -123,14 +118,14 @@ def part2(lines):
 
     for hand in hands:
         hand.handtype()
-    # hands.sort()
-    # result = 0
+    hands.sort()
+    result = 0
 
-    # for i, hand in enumerate(hands):
-    #     result += (i + 1) * hand.bid
+    for i, hand in enumerate(hands):
+        result += (i + 1) * hand.bid
 
 
-    return(f"Result of Part 2.")
+    return(f"The total winnings are {result}")
 
 def main ():
     # Opens a dialog to select the input file
