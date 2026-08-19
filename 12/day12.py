@@ -1,5 +1,6 @@
 import easygui
 import time
+import functools
 
 AOCDAY = "12"
 
@@ -11,15 +12,63 @@ def readFile(fileName):
         lines[i] = lines[i].rstrip()
     return lines
 
+@functools.cache
+def count_valid(pipes, groups, i,j):
+    if i >= len(pipes):
+        if j >= len(groups):
+            return 1
+        else:
+            return 0
+    if j >= len(groups):
+        if "#" in pipes[i:]: 
+            return 0
+        else:
+            return 1
+     
+    total = 0
+    if pipes[i] == "." or pipes[i]=="?":
+        total += count_valid(pipes,groups,i+1,j)
+    if pipes[i] == "#" or pipes[i]== "?":
+        target = groups[j]
+        valid = True
+        for k in range(target):
+            if i+k >= len(pipes) or pipes[i+k] == ".":
+                valid = False
+                break
+    
+        if i+target < len(pipes) and pipes[i+ target] == "#":
+            valid = False
+        if valid:
+            total += count_valid(pipes,groups,i+target+1, j+1)
+    
+    return total
+                            
+
+    
+
+
 def part1(lines):
     # Code the solution to part 1 here, returning the answer as a string
+    result = 0
+    for line in lines:
 
-    return(f"Result of Part 1.")
+        pipes = line.split()[0]
+        groups = [int(x) for x in line.split()[1].split(",")]
+        result+= count_valid(pipes,tuple(groups),0,0)
+
+    return(f"Total pipe permutations is {result}")
 
 def part2(lines):
     # Code the solution to part 2 here, returning the answer as a string
+    result = 0
+    for line in lines:
 
-    return(f"Result of Part 2.")
+        pipes = "?".join([line.split()[0]] * 5)
+        groups = [int(x) for x in line.split()[1].split(",")]*5
+        result+= count_valid(pipes,tuple(groups),0,0)
+
+    return(f"Total pipe permutations is {result}")
+
 
 def main ():
     # Opens a dialog to select the input file
