@@ -40,9 +40,10 @@ def part1(lines):
             "D": Coordinate(0, 1), 
             "L": Coordinate(-1,0)
             }
-
+    perimeter = 0
     for line in lines:
         dir, steps, colour = line.split(" ")
+        perimeter += int(steps)
         current = current + dirs[dir] * (int(steps))
         corners.append(current)
 
@@ -51,13 +52,38 @@ def part1(lines):
 
     for i in range(len(corners)):
         area += corners[i].cross(corners[(i+1)%len(corners)])
-        print((corners[i], corners[i+1]))
-        print(area)
+
+    area = area//2 + perimeter//2 + 1
+
     return(f"The total area of the lagoon is {area}")
 
 def part2(lines):
     # Code the solution to part 2 here, returning the answer as a string
+    current = Coordinate(0,0)
+    corners = []
+    dirs = {"3": Coordinate(0,-1), 
+            "0": Coordinate(1, 0), 
+            "1": Coordinate(0, 1), 
+            "2": Coordinate(-1,0)
+            }
+    perimeter = 0
+    for line in lines:
+        _, _, colour = line.split(" ")
+        dir = colour[-2]
+        steps = int(colour[2:-2], base=16)
+        perimeter += int(steps)
+        current = current + dirs[dir] * (int(steps))
+        corners.append(current)
 
+    area = 0
+
+
+    for i in range(len(corners)):
+        area += corners[i].cross(corners[(i+1)%len(corners)])
+
+    area = area//2 + perimeter//2 + 1
+
+    return(f"The total area of the lagoon is {area}")
     return(f"Result of Part 2.")
 
 def main ():
@@ -82,3 +108,6 @@ def main ():
     print("  Part 2 Result: " + str(p2Result))
 
 main()
+
+
+
