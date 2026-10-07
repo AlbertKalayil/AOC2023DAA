@@ -59,17 +59,73 @@ def part1(lines):
             if not branched:
                 rulename = rules[rulename][-1]
             rulesseen.append(rulename)
-        print(part)
-        print(rulesseen)
+       
         if rulename == "A":
             result += sum(part.values())
     
     return (f"Total value of accepted parts is: {result}")
 
+def valid_range(current):
+    for c in 'xmas':
+        a,b = current[c]
+        if a>b:
+            return False
+    return True
+        
+
 def part2(lines):
     # Code the solution to part 2 here, returning the answer as a string
+    rules = {}
+    ranges = [{'x':(1,4000), 'm': (1,4000), 'a': (1,4000), 's': (1,4000), 'rule': 'in'}]
+    result = 0
+    
+    for line in lines:
+        if line == "":
+            break
+        else : 
+            rulename = line.split("{")[0]
+            ruletext = line.split("{")[1][:-1]
+            checks = []
+            for check in ruletext.split(",")[:-1]:
+                par = check[0]
+                operator = check[1]
+                value = int(check.split(":")[0][2:])
+                target = check.split(":")[1]
+                checks.append((par,operator,value,target))
+            checks.append(ruletext.split(",")[-1])
+            rules[rulename]=checks
+    while len(ranges)>0:
 
-    return(f"Result of Part 2.")
+        current = ranges.pop()
+    
+        if current['rule']== 'A':
+            result += (current['x'][1]- current['x'][0]+1)* (current['a'][1]- current['a'][0]+1)* (current['m'][1]- current['m'][0]+1)* (current['s'][1]- current['s'][0]+1)
+            continue
+        elif current['rule']=='R':
+            continue
+
+        rule = rules[current["rule"]]
+        for check in rule[:-1]:
+            new_range = {'x':current['x'], 
+                        'm': current['m'], 
+                        'a': current['a'], 
+                        's': current['s'],
+                        'rule': check[3] } 
+            if check[1] == '>':
+                new_range[check[0]]=(max(check[2]+1,current[check[0]][0]), current[check[0]][1])
+                current[check[0]]=(current[check[0]][0], min(check[2], current[check[0]][1]))
+            else: 
+                new_range[check[0]]= (current[check[0]][0], min(check[2]-1, current[check[0]][1]))
+                current[check[0]]= (max(check[2],current[check[0]][0]), current[check[0]][1])
+            if valid_range(new_range):
+                ranges.append(new_range)
+        current['rule']=rule[-1]
+        if valid_range(new_range):
+            ranges.append(current)
+    
+
+    
+    return(f"Result of Part 2: {result}")
 
 def main ():
     # Opens a dialog to select the input file
