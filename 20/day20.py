@@ -1,5 +1,6 @@
 import easygui
 import time
+import math
 
 AOCDAY = "20"
 
@@ -115,21 +116,26 @@ def part2(lines):
 
             if output in nodes and type(nodes[output]).__name__ == 'Conjunction':
                 nodes[output].inputs[node.name]= LOW
+    rx_parent = next(node.name for node in nodes.values() if 'rx' in node.outputs)
     
     pushes = 0
+    cycles = {}
     while True:
 
 
         q = [('button',LOW, 'broadcaster')]
         pushes += 1
-        if pushes%10000 == 0:
-            print(pushes)
         while q : 
             message = q.pop(0)
-            if message[2] == 'df' and message[1] == HIGH:
-                print(message)
-                print(pushes)
-                # return f'Number of button presses {pushes}'
+            if (
+                message[2] == rx_parent
+                and message[1] == HIGH
+                and message[0] not in cycles
+            ):
+                cycles[message[0]] = pushes
+
+            if len(cycles) == len(nodes[rx_parent].inputs):
+                return f'Number of button presses {math.lcm(*cycles.values())}'
            
             if message[2] in nodes:
 
