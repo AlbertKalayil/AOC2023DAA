@@ -1,5 +1,6 @@
 import easygui
 import time
+import heapq
 
 AOCDAY = "22"
 
@@ -60,15 +61,10 @@ class Brick:
     def __lt__(self,other):
         return self.a < other.a
 
-    def intersects(self,other):
-        if not ((other.a.x <= self.a.x and self.a.x <= other.b.x) or (self.a.x <= other.a.x and other.a.x <= self.b.x)\
-            or (self.a.x == self.b.x and self.b.x == other.a.x and other.a.x == other.b.x)):
+    def overlaps(self,other):
+        if not ((other.a.x <= self.a.x and self.a.x <= other.b.x) or (self.a.x <= other.a.x and other.a.x <= self.b.x)):
             return False
-        if not ((other.a.y <= self.a.y and self.a.y <= other.b.y) or (self.a.y <= other.a.y and other.a.y <= self.b.y)\
-            or (self.a.y == self.b.y and self.b.y == other.a.y and other.a.y == other.b.y)):
-            return False
-        if not ((other.a.z <= self.a.z and self.a.z <= other.b.z) or (self.a.z <= other.a.z and other.a.z <= self.b.z)\
-            or (self.a.z == self.b.z and self.b.z == other.a.z and other.a.z == other.b.z)):
+        if not ((other.a.y <= self.a.y and self.a.y <= other.b.y) or (self.a.y <= other.a.y and other.a.y <= self.b.y)):
             return False
         return True
 
@@ -90,19 +86,25 @@ def part1(lines):
     # i in range(len()):    
         block = blocks[i]
         done = False
-        while not done:
-            
-            if block.a.z == 1:
-                done = True
-            else:
-                block = block.dropped()
-                for j in range(i):
-                    if block.intersects(blocks[j]):
-                        done = True
-                        supporting[j].append(i)
-                        supported[i].append(j)
-                if not done:
-                    blocks[i]= block
+        overlaps = []
+        for j in range(i):
+            if blocks[i].overlaps(blocks[j]):
+                overlaps.append(j)
+        maxz = 0
+        restingOn = []
+        for under in overlaps:
+            if blocks[under].b.z == maxz:
+                restingOn.append(under)
+            elif blocks[under].b.z > maxz:
+                maxz = blocks[under].b.z
+                restingOn = [under]
+        height = block.b.z - block.a.z
+        block.a.z = maxz + 1
+        block.b.z = maxz + 1 + height
+        supported[i] = restingOn
+        for num in restingOn:
+            supporting[num].append(i)
+
     result = 0
     only = [False]*len(blocks)
 
@@ -130,32 +132,51 @@ def part2(lines):
     # i in range(len()):    
         block = blocks[i]
         done = False
-        while not done:
-            
-            if block.a.z == 1:
-                done = True
-            else:
-                block = block.dropped()
-                for j in range(i):
-                    if block.intersects(blocks[j]):
-                        done = True
-                        supporting[j].append(i)
-                        supported[i].append(j)
-                if not done:
-                    blocks[i]= block
-    result = 0
-    only = [False]*len(blocks)
+        overlaps = []
+        for j in range(i):
+            if blocks[i].overlaps(blocks[j]):
+                overlaps.append(j)
+        maxz = 0
+        restingOn = []
+        for under in overlaps:
+            if blocks[under].b.z == maxz:
+                restingOn.append(under)
+            elif blocks[under].b.z > maxz:
+                maxz = blocks[under].b.z
+                restingOn = [under]
+        height = block.b.z - block.a.z
+        block.a.z = maxz + 1
+        block.b.z = maxz + 1 + height
+        supported[i] = restingOn
+        for num in restingOn:
+            supporting[num].append(i)
 
-    for group in supported: 
-        if len(group) == 1:
-            only[group[0]]=True
-    for i in range(len(only)):
-        if  only[i]:
-            result += len(blocks)-i-1
-    print (only)
-    return(f"total {result} blocks will fall")
+    result = 0
+    i = 0
+    for i in range(len(blocks)):
+        if len(supporting[i]) == 0:
+            pass
+        q = []
+        fallen = set([i])
+        for num in supporting[i]:
+            heapq.heappush(q, num)
+        while q:
+            curr = heapq.heappop(q)
+            if curr in fallen:
+                continue
+            falling = True
+            for under in supported[curr]:
+                if under not in fallen:
+                    falling = False
+                    break
+            if falling:
+                fallen.add(curr)
+                result += 1
+                for num in supporting[curr]:
+                    heapq.heappush(q, num)
+
     
-    return(f"Result of Part 2.")
+    return(f"We can disintegrate {result} blocks")
 
 def main ():
     # Opens a dialog to select the input file
