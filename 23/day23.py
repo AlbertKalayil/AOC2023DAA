@@ -32,6 +32,67 @@ class Coordinate:
     def __hash__(self):
         return self.x * 1000 + self.y
 
+dirs = (Coordinate(0,-1), Coordinate(1, 0), Coordinate(0, 1), Coordinate(-1,0))
+
+def dfs_max(map, curr, target, visited):
+    while True:
+        options = []
+        slopes = {'^': 0, '>': 1, 'v': 2, '<':3}
+        if curr.char_at(map) in "^v><":
+            next = curr + dirs[slopes[curr.char_at(map)]]
+            if next not in visited:
+                visited.add(next)
+                curr = next
+            else:
+                return 0
+        else:
+            for dir in dirs:
+                next = curr + dir
+                if next == target:
+                    return len(visited)
+                if next.validate(map) and next.char_at(map) != "#" and next not in visited:
+                    options.append(next)
+            if len(options) == 0:
+                return 0
+            elif len(options) == 1:
+                visited.add(options[0])
+                curr = options[0]
+            else:
+                maxsteps = 0
+                for option in options:
+                    newvisited = set(visited)
+                    newvisited.add(option)
+                    maxsteps = max(maxsteps, dfs_max(map, option, target, newvisited))
+                return maxsteps
+
+def find_neighbour(map, curr, visited, intersections):
+    while True:
+        options = []
+        for dir in dirs:
+            next = curr + dir
+            if next in intersections and next not in visited:
+                return next, len(visited)
+            if next.validate(map) and next.char_at(map) != "#" and next not in visited:
+                options.append(next)
+        if len(options) == 0:
+            return None, None
+        elif len(options) == 1:
+            visited.add(options[0])
+            curr = options[0]
+
+def dfs_max2(curr, target, edges, visited, steps):
+    maxsteps = 0
+    for next in edges[curr].keys():
+        cost = steps + edges[curr][next]
+        if next == target:
+            return cost
+        else:
+            if next not in visited:
+                visited.add(next)
+                maxsteps = max(maxsteps, dfs_max2(next, target, edges, visited, cost))
+                visited.remove(next)
+    return maxsteps
+
 def readFile(fileName):
     # Reads the file at fileName and returns a list of lines stripped of newlines
     with open(fileName, "r") as file:
@@ -44,7 +105,6 @@ def part1(lines):
     # Code the solution to part 1 here, returning the answer as a string
     startx = -1
     targetx = -1
-    dirs = (Coordinate(0,-1), Coordinate(1, 0), Coordinate(0, 1), Coordinate(-1,0))
     for i in range(len(lines[0])):
         if lines[0][i] == '.':
             startx = i
@@ -54,21 +114,48 @@ def part1(lines):
     start = Coordinate(startx, 0)
     target = Coordinate(targetx, len(lines) - 1)
 
-    visited = set()
-    stack = [start]
-
-    while stack:
-        curr = stack.pop(0)
-        for dir in dirs:
-            next = curr + dir
-            
-
-    return(f"Result of Part 1.")
+    visited = set([start])
+     
+    return(f"The longest path for a walk is {dfs_max(lines, start, target, visited)} steps.")
 
 def part2(lines):
-    # Code the solution to part 2 here, returning the answer as a string
+    startx = -1
+    targetx = -1
+    for i in range(len(lines[0])):
+        if lines[0][i] == '.':
+            startx = i
+        if lines[-1][i] == '.':
+            targetx = i
 
-    return(f"Result of Part 2.")
+    start = Coordinate(startx, 0)
+    target = Coordinate(targetx, len(lines) - 1)
+
+    intersections = set([start, target])
+    xmax = len(lines[0]) - 1
+    ymax = len(lines) - 1
+    for x in range(1, xmax):
+        for y in range(1, ymax):
+            curr = Coordinate(x, y)
+            if curr.char_at(lines) == "#":
+                continue
+            count = 0
+            for dir in dirs:
+                next = curr + dir
+                if next.validate(lines) and next.char_at(lines) != "#":
+                    count += 1
+            if count > 2:
+                intersections.add(curr)
+
+    edges = {}
+    for intersection in intersections:
+        edges[intersection] = {}
+        for dir in dirs:
+            next = intersection + dir
+            if next.validate(lines) and next.char_at(lines) != '#':
+                other, cost = find_neighbour(lines, next, set([intersection, next]), intersections)
+                if other is not None:
+                    edges[intersection][other] = cost
+    return(f"The longest path for a walk is {dfs_max2(start, target, edges, set([start]), 0)} steps.")
 
 def main ():
     # Opens a dialog to select the input file
